@@ -1,35 +1,22 @@
 import UIKit
 
-@MainActor
-protocol ForecastModuleFactoryProtocol {
-    func makeForecastModule() -> UIViewController
-}
-
-@MainActor
-final class ForecastModuleFactory: ForecastModuleFactoryProtocol {
+final class ForecastModuleFactory {
     func makeForecastModule() -> UIViewController {
         let view = ForecastView()
-        
         let network = NetworkService()
         let location = LocationService()
         let dateService = DateFormatterService()
         let mapper = ForecastMapper(dateService: dateService)
         
         let presenter = ForecastPresenter(
-            dependencies: .init(
-                networkService: network,
-                locationService: location,
-                mapper: mapper
-            ),
-            view: view
+            networkService: network,
+            locationService: location,
+            mapper: mapper
         )
         
-        let vc = ForecastViewController(
-            dependencies: .init(
-                forecastView: view,
-                presenter: presenter
-            )
-        )
+        let vc = ForecastViewController(output: presenter, forecastView: view)
+        
+        presenter.view = vc
         
         return vc
     }

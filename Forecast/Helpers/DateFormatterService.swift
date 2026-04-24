@@ -1,13 +1,6 @@
 import Foundation
 
-protocol DateFormatterServiceProtocol {
-    func hour(from string: String) -> Int
-    func hourString(from string: String) -> String
-    func dayString(from string: String) -> String
-    func currentDayString() -> String
-}
-
-final class DateFormatterService: DateFormatterServiceProtocol {
+final class DateFormatterService {
     private let hourFormatter: DateFormatter = {
         let f = DateFormatter()
         f.dateFormat = "HH:mm:ss"

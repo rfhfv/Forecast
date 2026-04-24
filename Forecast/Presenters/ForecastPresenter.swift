@@ -1,79 +1,75 @@
 import UIKit
 
-@MainActor
-protocol ForecastPresenterProtocol: AnyObject {
-    func viewDidLoad() async
-}
-
-@MainActor
-protocol ForecastViewProtocol: AnyObject {
-    func showLoading()
-    func hideLoading()
-    func displayForecast(_ viewModel: ForecastViewModel?)
-    func displayError(_ message: String)
-}
-
-@MainActor
-final class ForecastPresenter: ForecastPresenterProtocol {
+final class ForecastPresenter {
+    private let networkService: NetworkService
+    private let locationService: LocationService
+    private let mapper: ForecastMapper
     
-    struct Dependencies {
-        let networkService: NetworkServiceProtocol
-        let locationService: LocationServiceProtocol
-        let mapper: ForecastMapperProtocol
-    }
+    weak var view: ForecastViewController?
     
-    private let dependencies: Dependencies
-    private weak var view: ForecastViewProtocol?
-    
-    init(
-        dependencies: Dependencies,
-        view: ForecastViewProtocol
+    init(networkService: NetworkService,
+         locationService: LocationService,
+         mapper: ForecastMapper
     ) {
-        self.dependencies = dependencies
-        self.view = view
+        self.networkService = networkService
+        self.locationService = locationService
+        self.mapper = mapper
     }
     
     func viewDidLoad() async {
         await loadForecast()
     }
-    
-    private func loadForecast() async {
-        view?.showLoading()
-        
+}
+
+private extension ForecastPresenter {
+    func loadForecast() async {
+        await MainActor.run {
+            view?.showLoading()
+        }
         do {
-            let location = try await dependencies.locationService.fetchLocation()
-            let city = await dependencies.locationService.getCityName(from: location)
-            let response = try await dependencies.networkService.fetchForecast(for: location)
+            let location = try await locationService.fetchLocation()
+            let city = await locationService.getCityName(from: location)
+            let response = try await networkService.fetchForecast(for: location)
             
-            let viewModel = dependencies.mapper.map(
+            let viewModel = mapper.map(
                 response: response,
                 city: city
             )
             
-            view?.displayForecast(viewModel)
+            await MainActor.run {
+                view?.displayForecast(viewModel)
+            }
         } catch is LocationError {
             await loadFallbackForecast()
         } catch {
-            view?.displayError(error.localizedDescription)
+            await MainActor.run {
+                view?.displayError(error.localizedDescription)
+            }
         }
         
-        view?.hideLoading()
+        await MainActor.run {
+            view?.hideLoading()
+        }
     }
     
-    private func loadFallbackForecast() async {
+    func loadFallbackForecast() async {
         do {
-            let response = try await dependencies.networkService.fetchForecast(
+            let response = try await networkService.fetchForecast(
                 for: .moscow
             )
             
-            let viewModel = dependencies.mapper.map(
+            let viewModel = mapper.map(
                 response: response,
                 city: Constants.Text.defaultCity
             )
             
-            view?.displayForecast(viewModel)
+            await MainActor.run {
+                view?.displayForecast(viewModel)
+            }
         } catch {
-            view?.displayError(Constants.Text.connectionError)
+            await MainActor.run {
+                view?.displayError(Constants.Text.connectionError)
+            }
         }
     }
 }
