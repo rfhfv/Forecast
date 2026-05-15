@@ -1,6 +1,10 @@
 import UIKit
 
-final class ForecastModuleFactory {
+protocol ForecastModuleFactoryProtocol {
+    func makeForecastModule() -> UIViewController
+}
+
+final class ForecastModuleFactory: ForecastModuleFactoryProtocol {
     func makeForecastModule() -> UIViewController {
         let view = ForecastView()
         let network = NetworkService()
@@ -16,7 +20,7 @@ final class ForecastModuleFactory {
         
         let vc = ForecastViewController(output: presenter, forecastView: view)
         
-        presenter.view = vc
+        presenter.view = view
         
         return vc
     }

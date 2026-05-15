@@ -1,5 +1,10 @@
 import CoreLocation
 
+protocol LocationServiceProtocol {
+    func fetchLocation() async throws -> LocationCoordinate
+    func getCityName(from coordinate: LocationCoordinate) async -> String
+}
+
 final class LocationService: NSObject {
     private let locationManager = CLLocationManager()
     private var continuation: CheckedContinuation<LocationCoordinate, Error>?
@@ -9,7 +14,9 @@ final class LocationService: NSObject {
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.delegate = self
     }
-    
+}
+
+extension LocationService: LocationServiceProtocol {
     func fetchLocation() async throws -> LocationCoordinate {
         return try await withCheckedThrowingContinuation { continuation in
             self.continuation = continuation

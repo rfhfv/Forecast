@@ -1,10 +1,10 @@
 import UIKit
 
-class ForecastViewController: UIViewController {
-    private let forecastView: ForecastView
-    private let output: ForecastPresenter
+final class ForecastViewController: UIViewController {
+    private let forecastView: ForecastViewProtocol
+    private let output: ForecastPresenterProtocol
     
-    init(output: ForecastPresenter, forecastView: ForecastView) {
+    init(output: ForecastPresenterProtocol, forecastView: ForecastViewProtocol) {
         self.output = output
         self.forecastView = forecastView
         super.init(nibName: nil, bundle: nil)
@@ -15,7 +15,8 @@ class ForecastViewController: UIViewController {
     }
     
     override func loadView() {
-        view = forecastView
+        guard let view = forecastView as? UIView else { return }
+        self.view = view
     }
     
     override func viewDidLoad() {
@@ -32,7 +33,7 @@ class ForecastViewController: UIViewController {
         forecastView.hideLoading()
     }
     
-    func displayForecast(_ viewModel: ForecastViewModel?) {
+    func displayForecast(_ viewModel: ForecastViewModel) {
         forecastView.displayForecast(viewModel)
     }
     
@@ -54,7 +55,7 @@ private extension ForecastViewController {
     
     func reload() {
         Task {
-            await output.viewDidLoad()
+            await output.fetchForecast()
         }
     }
 }

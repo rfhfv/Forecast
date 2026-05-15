@@ -1,12 +1,18 @@
 import Foundation
 
+protocol ForecastMapperProtocol: AnyObject {
+    func map(response: ForecastResponse, city: String) -> ForecastViewModel
+}
+
 final class ForecastMapper {
-    private let dateService: DateFormatterService
+    private let dateService: DateFormatterServiceProtocol
     
-    init(dateService: DateFormatterService) {
+    init(dateService: DateFormatterServiceProtocol) {
         self.dateService = dateService
     }
-    
+}
+
+extension ForecastMapper: ForecastMapperProtocol {
     func map(response: ForecastResponse, city: String) -> ForecastViewModel {
         guard let today = response.days.first else {
             return .empty

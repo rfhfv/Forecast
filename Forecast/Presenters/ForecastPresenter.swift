@@ -1,22 +1,28 @@
 import UIKit
 
+protocol ForecastPresenterProtocol: AnyObject {
+    func fetchForecast() async
+}
+
 final class ForecastPresenter {
-    private let networkService: NetworkService
-    private let locationService: LocationService
-    private let mapper: ForecastMapper
+    private let networkService: NetworkServiceProtocol
+    private let locationService: LocationServiceProtocol
+    private let mapper: ForecastMapperProtocol
     
-    weak var view: ForecastViewController?
+    weak var view: ForecastViewProtocol?
     
-    init(networkService: NetworkService,
-         locationService: LocationService,
-         mapper: ForecastMapper
+    init(networkService: NetworkServiceProtocol,
+         locationService: LocationServiceProtocol,
+         mapper: ForecastMapperProtocol
     ) {
         self.networkService = networkService
         self.locationService = locationService
         self.mapper = mapper
     }
-    
-    func viewDidLoad() async {
+}
+
+extension ForecastPresenter: ForecastPresenterProtocol {
+    func fetchForecast() async {
         await loadForecast()
     }
 }

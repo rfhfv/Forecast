@@ -1,5 +1,15 @@
 import UIKit
 
+protocol ForecastViewProtocol: AnyObject {
+    var onRetry: (() -> Void)? { get set }
+    var onRefresh: (() -> Void)? { get set }
+    
+    func showLoading()
+    func hideLoading()
+    func displayForecast(_ viewModel: ForecastViewModel)
+    func displayError(_ message: String)
+}
+
 final class ForecastView: UIView {
     private let currentWeatherView = CurrentWeatherView()
     private var viewModel: ForecastViewModel?
@@ -13,10 +23,6 @@ final class ForecastView: UIView {
         case daily
     }
     
-    private let scrollView = UIScrollView()
-    private let contentView = UIView()
-    private let loadingIndicator = UIActivityIndicatorView(style: .large)
-    
     private lazy var collectionView: UICollectionView = {
         let collection = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
         collection.register(HourlyCell.self, forCellWithReuseIdentifier: HourlyCell.identifier)
@@ -24,7 +30,27 @@ final class ForecastView: UIView {
         collection.register(DailyCell.self, forCellWithReuseIdentifier: DailyCell.identifier)
         collection.backgroundColor = .clear
         collection.dataSource = self
+        collection.translatesAutoresizingMaskIntoConstraints = false
         return collection
+    }()
+    
+    private let scrollView: UIScrollView = {
+        let scrollView = UIScrollView()
+        scrollView.showsVerticalScrollIndicator = false
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        return scrollView
+    }()
+    
+    private let contentView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    private let loadingIndicator: UIActivityIndicatorView = {
+        let indicator =  UIActivityIndicatorView(style: .large)
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        return indicator
     }()
     
     private let errorContainer: UIStackView = {
@@ -32,6 +58,7 @@ final class ForecastView: UIView {
         stack.axis = .vertical
         stack.spacing = Constants.Layout.Spacing.extraLarge
         stack.alignment = .center
+        stack.translatesAutoresizingMaskIntoConstraints = false
         return stack
     }()
     
@@ -62,7 +89,9 @@ final class ForecastView: UIView {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+}
+
+extension ForecastView: ForecastViewProtocol {
     func showLoading() {
         loadingIndicator.startAnimating()
         scrollView.isHidden = true
@@ -72,6 +101,23 @@ final class ForecastView: UIView {
     func hideLoading() {
         loadingIndicator.stopAnimating()
         scrollView.refreshControl?.endRefreshing()
+    }
+    
+    func displayForecast(_ viewModel: ForecastViewModel) {
+        showContent(with: viewModel)
+    }
+    
+    func displayError(_ message: String) {
+        showError(message)
+    }
+}
+
+private extension ForecastView {
+    func setupUI() {
+        setupViews()
+        setupConstraints()
+        setupRefrechControl()
+        setupActions()
     }
     
     func showError(_ message: String) {
@@ -91,24 +137,6 @@ final class ForecastView: UIView {
         collectionView.reloadData()
     }
     
-    func displayForecast(_ viewModel: ForecastViewModel?) {
-        guard let model = viewModel else { return }
-        showContent(with: model)
-    }
-    
-    func displayError(_ message: String) {
-        showError(message)
-    }
-}
-
-private extension ForecastView {
-    func setupUI() {
-        setupViews()
-        setupConstraints()
-        setupRefrechControl()
-        setupActions()
-    }
-    
     func setupRefrechControl() {
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
@@ -120,11 +148,11 @@ private extension ForecastView {
     }
     
     @objc func handleRefresh() {
-        onRetry?()
+        onRefresh?()
     }
     
     @objc func retryTapped() {
-        onRefresh?()
+        onRetry?()
     }
     
     func createLayout() -> UICollectionViewLayout {
@@ -148,7 +176,7 @@ private extension ForecastView {
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
         
         let groupSize = NSCollectionLayoutSize(
-            widthDimension: .absolute(Constants.Grid.Size.horizontalWidth),
+            widthDimension: .absolute(Constants.Grid.Size.itemSize.width),
             heightDimension: .absolute(Constants.Grid.Size.itemSize.height))
         
         let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
@@ -190,7 +218,7 @@ private extension ForecastView {
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
         
         let groupSize = NSCollectionLayoutSize(
-            widthDimension: .absolute(Constants.Grid.Size.horizontalWidth),
+            widthDimension: .absolute(Constants.Grid.Size.itemSize.width),
             heightDimension: .absolute(Constants.Grid.Size.itemSize.height)
         )
         
@@ -205,22 +233,13 @@ private extension ForecastView {
     
     func setupViews() {
         backgroundColor = .customBackground
+        currentWeatherView.translatesAutoresizingMaskIntoConstraints = false
         
-        [scrollView, contentView, loadingIndicator, errorContainer].forEach {
-            addSubview($0)
-            $0.translatesAutoresizingMaskIntoConstraints = false
-        }
-        
-        [currentWeatherView, collectionView].forEach {
-            contentView.addSubview($0)
-            $0.translatesAutoresizingMaskIntoConstraints = false
-        }
+        addCustomSubviews(scrollView, contentView, loadingIndicator, errorContainer)
+        contentView.addCustomSubviews(currentWeatherView, collectionView)
         
         scrollView.addSubview(contentView)
-        scrollView.showsVerticalScrollIndicator = false
-        
-        errorContainer.addArrangedSubview(errorLabel)
-        errorContainer.addArrangedSubview(retryButton)
+        errorContainer.addCustomArrangedSubviews(errorLabel, retryButton)
     }
     
     func setupConstraints() {

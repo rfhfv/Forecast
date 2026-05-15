@@ -1,5 +1,12 @@
 import Foundation
 
+protocol DateFormatterServiceProtocol: AnyObject {
+    func hour(from string: String) -> Int
+    func hourString(from string: String) -> String
+    func dayString(from string: String) -> String
+    func currentDayString() -> String
+}
+
 final class DateFormatterService {
     private let hourFormatter: DateFormatter = {
         let f = DateFormatter()
@@ -32,7 +39,9 @@ final class DateFormatterService {
         f.dateFormat = "EEEE, d MMMM"
         return f
     }()
-    
+}
+
+extension DateFormatterService: DateFormatterServiceProtocol {
     func hour(from string: String) -> Int {
         guard let date = hourFormatter.date(from: string) else { return 0 }
         return Calendar.current.component(.hour, from: date)

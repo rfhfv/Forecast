@@ -49,6 +49,7 @@
 		84E89EDD2F89DB630001D49D /* ThemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E89EDC2F89DB630001D49D /* ThemeManager.swift */; };
 		84E89EE02F89DB6E0001D49D /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E89EDF2F89DB6E0001D49D /* Theme.swift */; };
 		84E89EE22F89E3B00001D49D /* UIColor + Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E89EE12F89E3AF0001D49D /* UIColor + Extensions.swift */; };
+		84EEBA532FB5826A00295477 /* KeychainManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84EEBA522FB5826A00295477 /* KeychainManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -107,6 +108,8 @@
 		84E89EDC2F89DB630001D49D /* ThemeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeManager.swift; sourceTree = "<group>"; };
 		84E89EDF2F89DB6E0001D49D /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		84E89EE12F89E3AF0001D49D /* UIColor + Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor + Extensions.swift"; sourceTree = "<group>"; };
+		84EEBA522FB5826A00295477 /* KeychainManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainManager.swift; sourceTree = "<group>"; };
+		84EEBA542FB5858000295477 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -247,6 +250,7 @@
 		849531042F84B36F0097F087 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				84EEBA512FB5824C00295477 /* Manager */,
 				8460A6012F8B547E00280B81 /* Errors */,
 				849531092F84B5590097F087 /* NetworkEndpoint.swift */,
 				849531052F84B3850097F087 /* NetworkService.swift */,
@@ -312,6 +316,15 @@
 				84E89EDC2F89DB630001D49D /* ThemeManager.swift */,
 			);
 			path = ThemeManager;
+			sourceTree = "<group>";
+		};
+		84EEBA512FB5824C00295477 /* Manager */ = {
+			isa = PBXGroup;
+			children = (
+				84EEBA522FB5826A00295477 /* KeychainManager.swift */,
+				84EEBA542FB5858000295477 /* Config.xcconfig */,
+			);
+			path = Manager;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -436,6 +449,7 @@
 				8460A5EF2F8B35CA00280B81 /* CurrentForecastViewModel.swift in Sources */,
 				849530F22F84AB1F0097F087 /* ForecastViewController.swift in Sources */,
 				842757E02F88EE0600464B2D /* DetailsCell.swift in Sources */,
+				84EEBA532FB5826A00295477 /* KeychainManager.swift in Sources */,
 				8460A5ED2F8B35B900280B81 /* ForecastViewModel.swift in Sources */,
 				849531252F8607F80097F087 /* HourlyCell.swift in Sources */,
 				849531032F84AE250097F087 /* ForecastResponse.swift in Sources */,
@@ -524,6 +538,7 @@
 		};
 		849530FC2F84AB240097F087 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 84EEBA542FB5858000295477 /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -584,6 +599,7 @@
 		};
 		849530FD2F84AB240097F087 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 84EEBA542FB5858000295477 /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -638,6 +654,7 @@
 		};
 		849530FF2F84AB240097F087 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 84EEBA542FB5858000295477 /* Config.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -665,6 +682,7 @@
 		};
 		849531002F84AB240097F087 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 84EEBA542FB5858000295477 /* Config.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
