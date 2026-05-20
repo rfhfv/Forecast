@@ -1,32 +1,27 @@
 import UIKit
 
-protocol WeatherViewDelegate: AnyObject {
-    func didTapRetry()
-    func didRefresh()
+protocol ForecastViewProtocol: AnyObject {
+    var onRetry: (() -> Void)? { get set }
+    var onRefresh: (() -> Void)? { get set }
+    
+    func showLoading()
+    func hideLoading()
+    func displayForecast(_ viewModel: ForecastViewModel)
+    func displayError(_ message: String)
 }
 
 final class ForecastView: UIView {
-    struct Dependencies {
-        let currentWeatherView: CurrentWeatherView
-        
-        static func makeDefault() -> Dependencies {
-            Dependencies(
-                currentWeatherView: CurrentWeatherView())
-        }
-    }
+    private let currentWeatherView = CurrentWeatherView()
+    private var viewModel: ForecastViewModel?
+    
+    var onRetry: (() -> Void)?
+    var onRefresh: (() -> Void)?
     
     private enum Section: Int, CaseIterable {
         case hourly
         case details
         case daily
     }
-    
-    private var viewModel: ForecastViewModel?
-    
-    private let dependencies: Dependencies
-    private let scrollView = UIScrollView()
-    private let contentView = UIView()
-    private let loadingIndicator = UIActivityIndicatorView(style: .large)
     
     private lazy var collectionView: UICollectionView = {
         let collection = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
@@ -35,7 +30,27 @@ final class ForecastView: UIView {
         collection.register(DailyCell.self, forCellWithReuseIdentifier: DailyCell.identifier)
         collection.backgroundColor = .clear
         collection.dataSource = self
+        collection.translatesAutoresizingMaskIntoConstraints = false
         return collection
+    }()
+    
+    private let scrollView: UIScrollView = {
+        let scrollView = UIScrollView()
+        scrollView.showsVerticalScrollIndicator = false
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        return scrollView
+    }()
+    
+    private let contentView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    private let loadingIndicator: UIActivityIndicatorView = {
+        let indicator =  UIActivityIndicatorView(style: .large)
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        return indicator
     }()
     
     private let errorContainer: UIStackView = {
@@ -43,6 +58,7 @@ final class ForecastView: UIView {
         stack.axis = .vertical
         stack.spacing = Constants.Layout.Spacing.extraLarge
         stack.alignment = .center
+        stack.translatesAutoresizingMaskIntoConstraints = false
         return stack
     }()
     
@@ -65,18 +81,17 @@ final class ForecastView: UIView {
         return button
     }()
     
-    weak var delegate: WeatherViewDelegate?
-    
-    init(dependencies: Dependencies = .makeDefault()) {
-        self.dependencies = dependencies
-        super.init(frame: .zero)
+    override init(frame: CGRect) {
+        super.init(frame: frame)
         setupUI()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+}
+
+extension ForecastView: ForecastViewProtocol {
     func showLoading() {
         loadingIndicator.startAnimating()
         scrollView.isHidden = true
@@ -86,6 +101,23 @@ final class ForecastView: UIView {
     func hideLoading() {
         loadingIndicator.stopAnimating()
         scrollView.refreshControl?.endRefreshing()
+    }
+    
+    func displayForecast(_ viewModel: ForecastViewModel) {
+        showContent(with: viewModel)
+    }
+    
+    func displayError(_ message: String) {
+        showError(message)
+    }
+}
+
+private extension ForecastView {
+    func setupUI() {
+        setupViews()
+        setupConstraints()
+        setupRefrechControl()
+        setupActions()
     }
     
     func showError(_ message: String) {
@@ -98,21 +130,11 @@ final class ForecastView: UIView {
     
     func showContent(with viewModel: ForecastViewModel) {
         self.viewModel = viewModel
+        currentWeatherView.configure(with: viewModel.current)
         scrollView.isHidden = false
         errorContainer.isHidden = true
         loadingIndicator.stopAnimating()
-        
-        dependencies.currentWeatherView.configure(with: viewModel.current)
         collectionView.reloadData()
-    }
-}
-
-private extension ForecastView {
-    func setupUI() {
-        setupViews()
-        setupConstraints()
-        setupRefrechControl()
-        setupActions()
     }
     
     func setupRefrechControl() {
@@ -126,11 +148,11 @@ private extension ForecastView {
     }
     
     @objc func handleRefresh() {
-        delegate?.didRefresh()
+        onRefresh?()
     }
     
     @objc func retryTapped() {
-        delegate?.didTapRetry()
+        onRetry?()
     }
     
     func createLayout() -> UICollectionViewLayout {
@@ -154,7 +176,7 @@ private extension ForecastView {
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
         
         let groupSize = NSCollectionLayoutSize(
-            widthDimension: .absolute(Constants.Grid.Size.horizontalWidth),
+            widthDimension: .absolute(Constants.Grid.Size.itemSize.width),
             heightDimension: .absolute(Constants.Grid.Size.itemSize.height))
         
         let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
@@ -196,7 +218,7 @@ private extension ForecastView {
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
         
         let groupSize = NSCollectionLayoutSize(
-            widthDimension: .absolute(Constants.Grid.Size.horizontalWidth),
+            widthDimension: .absolute(Constants.Grid.Size.itemSize.width),
             heightDimension: .absolute(Constants.Grid.Size.itemSize.height)
         )
         
@@ -211,22 +233,13 @@ private extension ForecastView {
     
     func setupViews() {
         backgroundColor = .customBackground
+        currentWeatherView.translatesAutoresizingMaskIntoConstraints = false
         
-        [scrollView, contentView, loadingIndicator, errorContainer].forEach {
-            addSubview($0)
-            $0.translatesAutoresizingMaskIntoConstraints = false
-        }
-        
-        [dependencies.currentWeatherView, collectionView].forEach {
-            contentView.addSubview($0)
-            $0.translatesAutoresizingMaskIntoConstraints = false
-        }
+        addCustomSubviews(scrollView, contentView, loadingIndicator, errorContainer)
+        contentView.addCustomSubviews(currentWeatherView, collectionView)
         
         scrollView.addSubview(contentView)
-        scrollView.showsVerticalScrollIndicator = false
-        
-        errorContainer.addArrangedSubview(errorLabel)
-        errorContainer.addArrangedSubview(retryButton)
+        errorContainer.addCustomArrangedSubviews(errorLabel, retryButton)
     }
     
     func setupConstraints() {
@@ -242,11 +255,11 @@ private extension ForecastView {
             contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
             contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
             
-            dependencies.currentWeatherView.topAnchor.constraint(equalTo: contentView.topAnchor),
-            dependencies.currentWeatherView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Constants.Layout.Spacing.large),
-            dependencies.currentWeatherView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Constants.Layout.Spacing.large),
+            currentWeatherView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            currentWeatherView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Constants.Layout.Spacing.large),
+            currentWeatherView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Constants.Layout.Spacing.large),
             
-            collectionView.topAnchor.constraint(equalTo: dependencies.currentWeatherView.bottomAnchor),
+            collectionView.topAnchor.constraint(equalTo: currentWeatherView.bottomAnchor),
             collectionView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             collectionView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -Constants.Layout.Spacing.large),
@@ -263,17 +276,6 @@ private extension ForecastView {
             retryButton.heightAnchor.constraint(equalToConstant: Constants.Layout.Size.button.height),
             retryButton.widthAnchor.constraint(equalToConstant: Constants.Layout.Size.button.width)
         ])
-    }
-}
-
-extension ForecastView: ForecastViewProtocol {
-    func displayForecast(_ viewModel: ForecastViewModel?) {
-        guard let model = viewModel else { return }
-        showContent(with: model)
-    }
-    
-    func displayError(_ message: String) {
-        showError(message)
     }
 }
 

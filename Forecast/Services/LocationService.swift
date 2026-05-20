@@ -2,42 +2,34 @@ import CoreLocation
 
 protocol LocationServiceProtocol {
     func fetchLocation() async throws -> LocationCoordinate
-    func getCityName(from coordinate: LocationCoordinate) async -> String 
+    func getCityName(from coordinate: LocationCoordinate) async -> String
 }
 
-final class LocationService: NSObject, LocationServiceProtocol {
-    struct Dependencies {
-        let locationManager: CLLocationManager
-        
-        static func makeDefault() -> Dependencies {
-            let manager = CLLocationManager()
-            manager.desiredAccuracy = kCLLocationAccuracyBest
-            return Dependencies(locationManager: manager)
-        }
-    }
-    
-    private let dependencies: Dependencies
+final class LocationService: NSObject {
+    private let locationManager = CLLocationManager()
     private var continuation: CheckedContinuation<LocationCoordinate, Error>?
     
-    init(dependencies: Dependencies = .makeDefault()) {
-        self.dependencies = dependencies
+    override init() {
         super.init()
-        dependencies.locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.delegate = self
     }
-    
+}
+
+extension LocationService: LocationServiceProtocol {
     func fetchLocation() async throws -> LocationCoordinate {
         return try await withCheckedThrowingContinuation { continuation in
             self.continuation = continuation
             
-            let status = dependencies.locationManager.authorizationStatus
+            let status = locationManager.authorizationStatus
             
             switch status {
             case .notDetermined:
-                dependencies.locationManager.requestWhenInUseAuthorization()
+                locationManager.requestWhenInUseAuthorization()
             case .denied, .restricted:
                 continuation.resume(throwing: LocationError.denied)
             case .authorizedAlways, .authorizedWhenInUse:
-                dependencies.locationManager.startUpdatingLocation()
+                locationManager.startUpdatingLocation()
             @unknown default:
                 continuation.resume(throwing: LocationError.unknown)
             }

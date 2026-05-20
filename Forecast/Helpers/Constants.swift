@@ -3,6 +3,8 @@ import UIKit
 enum Constants {
     enum Network {
         static let forecastDays = 14
+        static let stringAPIKey = "VisualCrossingAPIKey"
+        static let keyNotFound = "API ключ не найден"
     }
     
     enum Text {
@@ -51,7 +53,6 @@ enum Constants {
     enum Grid {
         enum Size {
             static let itemSize = CGSize(width: 80, height: 75)
-            static let horizontalWidth: CGFloat = 800
         }
         
         enum Spacing {

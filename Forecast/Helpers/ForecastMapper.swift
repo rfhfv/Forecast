@@ -1,16 +1,18 @@
 import Foundation
 
-protocol ForecastMapperProtocol {
+protocol ForecastMapperProtocol: AnyObject {
     func map(response: ForecastResponse, city: String) -> ForecastViewModel
 }
 
-final class ForecastMapper: ForecastMapperProtocol {
+final class ForecastMapper {
     private let dateService: DateFormatterServiceProtocol
     
     init(dateService: DateFormatterServiceProtocol) {
         self.dateService = dateService
     }
-    
+}
+
+extension ForecastMapper: ForecastMapperProtocol {
     func map(response: ForecastResponse, city: String) -> ForecastViewModel {
         guard let today = response.days.first else {
             return .empty
@@ -23,8 +25,10 @@ final class ForecastMapper: ForecastMapperProtocol {
             daily: mapDaily(response)
         )
     }
-    
-    private func mapCurrent(_ day: Day, city: String) -> CurrentForecastViewModel {
+}
+
+private extension ForecastMapper {
+    func mapCurrent(_ day: Day, city: String) -> CurrentForecastViewModel {
         .init(
             city: city,
             dateTime: dateService.currentDayString(),
@@ -32,7 +36,7 @@ final class ForecastMapper: ForecastMapperProtocol {
         )
     }
     
-    private func mapDetails(_ day: Day) -> ForecastDetailViewModel {
+    func mapDetails(_ day: Day) -> ForecastDetailViewModel {
         .init(
             sunrise: day.sunrise,
             sunset: day.sunset,
@@ -45,7 +49,7 @@ final class ForecastMapper: ForecastMapperProtocol {
         )
     }
     
-    private func mapHourly(_ response: ForecastResponse) -> [ForecastHourViewModel] {
+    func mapHourly(_ response: ForecastResponse) -> [ForecastHourViewModel] {
         let currentHour = Calendar.current.component(.hour, from: Date())
         
         let todayHours = response.days.first?.hours ?? []
@@ -64,7 +68,7 @@ final class ForecastMapper: ForecastMapperProtocol {
         }
     }
     
-    private func mapDaily(_ response: ForecastResponse) -> [ForecastDayViewModel] {
+    func mapDaily(_ response: ForecastResponse) -> [ForecastDayViewModel] {
         response.days.prefix(Constants.Network.forecastDays).map {
             ForecastDayViewModel(
                 dateTime: dateService.dayString(from: $0.datetime),

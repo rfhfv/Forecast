@@ -1,15 +1,12 @@
 import UIKit
 
-class ForecastViewController: UIViewController {
-    struct Dependencies {
-        let forecastView: ForecastView
-        let presenter: ForecastPresenterProtocol
-    }
+final class ForecastViewController: UIViewController {
+    private let forecastView: ForecastViewProtocol
+    private let output: ForecastPresenterProtocol
     
-    private let dependencies: Dependencies
-    
-    init(dependencies: Dependencies) {
-        self.dependencies = dependencies
+    init(output: ForecastPresenterProtocol, forecastView: ForecastViewProtocol) {
+        self.output = output
+        self.forecastView = forecastView
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -18,52 +15,47 @@ class ForecastViewController: UIViewController {
     }
     
     override func loadView() {
-        view = dependencies.forecastView
+        guard let view = forecastView as? UIView else { return }
+        self.view = view
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupDelegates()
-        
-        Task {
-            await  dependencies.presenter.viewDidLoad()
-        }
+        setupActions()
+        reload()
     }
     
-    private func setupDelegates() {
-        dependencies.forecastView.delegate = self
-    }
-}
-
-extension ForecastViewController: WeatherViewDelegate {
-    func didTapRetry() {
-        Task {
-            await dependencies.presenter.viewDidLoad()
-        }
-    }
-    
-    func didRefresh() {
-        Task {
-            await dependencies.presenter.viewDidLoad()
-        }
-    }
-}
-
-@MainActor
-extension ForecastViewController: ForecastViewProtocol {
     func showLoading() {
-        dependencies.forecastView.showLoading()
+        forecastView.showLoading()
     }
     
     func hideLoading() {
-        dependencies.forecastView.hideLoading()
+        forecastView.hideLoading()
     }
     
-    func displayForecast(_ viewModel: ForecastViewModel?) {
-        dependencies.forecastView.displayForecast(viewModel)
+    func displayForecast(_ viewModel: ForecastViewModel) {
+        forecastView.displayForecast(viewModel)
     }
     
     func displayError(_ message: String) {
-        dependencies.forecastView.displayError(message)
+        forecastView.displayError(message)
+    }
+}
+
+private extension ForecastViewController {
+    func setupActions() {
+        forecastView.onRetry = { [weak self] in
+            self?.reload()
+        }
+        
+        forecastView.onRefresh = { [weak self] in
+            self?.reload()
+        }
+    }
+    
+    func reload() {
+        Task {
+            await output.fetchForecast()
+        }
     }
 }

@@ -1,8 +1,9 @@
 import Foundation
 @testable import Forecast
 
-@MainActor
 final class MockForecastView: ForecastViewProtocol {
+    var onRetry: (() -> Void)?
+    var onRefresh: (() -> Void)?
     
     private(set) var didShowLoading = false
     private(set) var didHideLoading = false
@@ -17,7 +18,7 @@ final class MockForecastView: ForecastViewProtocol {
         didHideLoading = true
     }
     
-    func displayForecast(_ viewModel: ForecastViewModel?) {
+    func displayForecast(_ viewModel: ForecastViewModel) {
         displayedForecast = viewModel
     }
     

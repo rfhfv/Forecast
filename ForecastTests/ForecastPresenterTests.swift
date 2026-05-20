@@ -19,13 +19,11 @@ final class ForecastPresenterTests: XCTestCase {
         let mapper = MockForecastMapper()
         
         let presenter = ForecastPresenter(
-            dependencies: .init(
-                networkService: network,
-                locationService: location,
-                mapper: mapper
-            ),
-            view: view
+            networkService: network,
+            locationService: location,
+            mapper: mapper
         )
+        presenter.view = view
         
         return (presenter, view, network, location, mapper)
     }
@@ -43,7 +41,7 @@ final class ForecastPresenterTests: XCTestCase {
         mapper.mappedModel = .empty
         
         // Act
-        await presenter.viewDidLoad()
+        await presenter.fetchForecast()
         
         // Assert
         XCTAssertTrue(view.didShowLoading)
@@ -60,7 +58,7 @@ final class ForecastPresenterTests: XCTestCase {
         location.locationResult = .failure(LocationError.denied)
         
         // Act
-        await presenter.viewDidLoad()
+        await presenter.fetchForecast()
         
         // Assert
         XCTAssertTrue(view.didShowLoading)
@@ -79,7 +77,7 @@ final class ForecastPresenterTests: XCTestCase {
         )
         
         // Act
-        await presenter.viewDidLoad()
+        await presenter.fetchForecast()
         
         // Assert
         XCTAssertTrue(view.didShowLoading)
