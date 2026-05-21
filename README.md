@@ -1,57 +1,49 @@
-# Forecast App (iOS)
+# Forecast App
 
-Мобильное приложение с прогнозом погоды, написанное на Swift + UIKit (полностью программная верстка).
+A modern iOS weather application built with UIKit and Clean Architecture principles.  
+The app provides current weather conditions, hourly forecasts, and daily forecasts based on the user’s location.
 
-## Описание проекта
+## Screenshots
 
-Приложение отображает следующую информацию:
+<img width="1300" height="782" alt="Image" src="https://github.com/user-attachments/assets/00f4f5dc-e658-43df-9b38-2032715f6f02" />
 
-- текущую погоду
-- почасовой прогноз (текущий день + следующий день)
-- прогноз на 14 дня
-- детальную информацию о погоде (ветер, влажность, давление и т.д.)
+## Features
 
-## Скриншоты
+- Current weather
+- Hourly forecast
+- Daily forecast
+- Location-based weather
+- Pull to refresh
+- Error handling with retry action
+- UIKit programmatic UI
+- UICollectionViewCompositionalLayout
+- Async/Await networking
+- CoreLocation integration
 
-<img width="878" height="900" alt="Image" src="https://github.com/user-attachments/assets/4d67fc6d-28d4-4a72-8f64-0ed95d97f4a5" />
+## Tech Stack
 
-## Архитектура
-
-Проект построен на архитектуре MVP с разделением на слои:
-
-- View — UIKit интерфейс
-- Presenter — бизнес-логика и обработка данных
-- Services — работа с сетью и геолокацией
-- Mapper — преобразование API моделей в ViewModel
-
-## Основной функционал
-- Определение геолокации пользователя
-- Получение данных о погоде через API
-- Почасовой прогноз (оставшиеся часы текущего дня + следующий день)
-- Прогноз на 14 дня
-- Pull-to-refresh
-- Обработка ошибок с кнопкой повторного запроса
-- Fallback на Москву при отказе в доступе к геолокации
-- Поддержка светлой и тёмной темы
-
-## API
-Используется Visual Crossing Weather API: [Visual Crossing API](https://www.visualcrossing.com/)
-
-## Тестирование
-
-В проекте реализованы юнит-тесты для бизнес-логики презентера (MVP слой).
-
-Покрыты основные сценарии:
-
-- успешная загрузка прогноза погоды
-- ошибка получения геолокации и fallback на дефолтный город (Москва)
-- ошибка сети и отображение сообщения об ошибке
-
-## Технологии
-- Swift
 - UIKit
-- Async/Await
-- URLSession
+- Swift Concurrency (Async/Await)
 - CoreLocation
-- Compositional Layout
-- MVP архитектура
+- URLSession
+- MVC/MVP-inspired architecture
+- Dependency Injection
+- Programmatic Auto Layout
+
+## Architecture
+
+The project is divided into several layers:
+
+- Presentation
+- Services
+- Models
+- Mapper
+- UI Components
+
+The app uses a modular structure with dependency injection through a factory.
+
+## Installation
+
+1. Clone the repository
+2. Open the `.xcodeproj`
+3. Run the project on Simulator or device
