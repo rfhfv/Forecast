@@ -26,7 +26,7 @@ The app provides current weather conditions, hourly forecasts, and daily forecas
 - Swift Concurrency (Async/Await)
 - CoreLocation
 - URLSession
-- MVC/MVP-inspired architecture
+- MVP
 - Dependency Injection
 - Programmatic Auto Layout
 
