@@ -1,46 +1,50 @@
 # Forecast
 
-iOS weather app built with Swift + UIKit (programmatic layout). Shows current weather, hourly forecast for 48 hours, 14-day forecast, and detailed metrics. Uses MVP architecture with async/await networking and unit tests.
+**Forecast** — приложение прогноза погоды для iOS, разработанное на **Swift** и **UIKit** (полностью программная верстка без Storyboard). 
 
-## Screenshots
+Приложение отображает текущую погоду, почасовой прогноз на 48 часов, прогноз на 14 дней и подробные погодные показатели. Архитектура проекта построена на **MVP**, используется современная асинхронная модель **async/await** и покрытие бизнес-логики модульными тестами.
+
+## Скриншоты
 
 <img width="1300" height="782" alt="Image" src="https://github.com/user-attachments/assets/00f4f5dc-e658-43df-9b38-2032715f6f02" />
 
-## Features
+## Возможности
 
-- **Current Weather:** Real-time weather conditions
-- **Hourly Forecast:** 48-hour forecast
-- **Daily Forecast:** 14-day forecast
-- **Location-Based Weather:** Automatic weather for user's location
-- **Pull to Refresh:** Manual update with refresh control
-- **Error Handling:** Retry action for failed requests
-- **Programmatic UI:** UIKit with Auto Layout, no storyboards
-- **Compositional Layout:** UICollectionViewCompositionalLayout for modern collection views
+- **Текущая погода** — отображение актуальных погодных условий в режиме реального времени.
+- **Почасовой прогноз** — прогноз погоды на ближайшие 48 часов.
+- **Прогноз на 14 дней** — долгосрочный прогноз с ежедневными данными.
+- **Определение местоположения** — автоматическое получение погоды для текущей геолокации пользователя.
+- **Pull to Refresh** — ручное обновление данных с помощью жеста обновления.
+- **Обработка ошибок** — возможность повторить запрос при возникновении ошибки сети.
+- **Программная верстка** — интерфейс полностью реализован на UIKit с использованием Auto Layout без Storyboard.
+- **Compositional Layout** — современная организация коллекций с помощью `UICollectionViewCompositionalLayout`.
 
-## Tech Stack
+## Технический стек
 
-- **Swift** + **UIKit** (programmatic layout)
-- **MVP** architecture
-- **Swift Concurrency** (Async/Await)
-- **CoreLocation** for location services
-- **URLSession** for networking
-- **Dependency Injection** via factory pattern
-- **XCTest** for unit tests
+- **Swift** + **UIKit** (программная верстка)
+- **MVP (Model–View–Presenter)**
+- **Swift Concurrency (async/await)**
+- **CoreLocation** — работа с геолокацией
+- **URLSession** — выполнение сетевых запросов
+- **Dependency Injection** — внедрение зависимостей через Factory
+- **XCTest** — модульное тестирование
 
-## Architecture
+## Архитектура
 
-The project is divided into several layers:
+Проект разделен на несколько независимых слоев:
 
-- **Presentation:** Views and presenters
-- **Services:** Networking, location, and other services
-- **Models:** Data entities
-- **Mapper:** Transforms API models to presentation models
-- **UI Components:** Reusable UI elements
+- **Presentation** — экраны приложения и презентеры.
+- **Services** — сетевой слой, сервис геолокации и другие сервисы.
+- **Models** — модели данных.
+- **Mapper** — преобразование моделей API в модели, используемые интерфейсом.
+- **UI Components** — переиспользуемые компоненты пользовательского интерфейса.
 
-The app uses a modular structure with dependency injection through a factory.
+Проект имеет модульную структуру и использует внедрение зависимостей через паттерн **Factory**, что упрощает тестирование, поддержку и дальнейшее развитие приложения.
 
-## Installation
+## Установка
 
-- git clone https://github.com/rfhfv/Forecast.git
-- cd Forecast
-- open Forecast.xcodeproj
+```bash
+git clone https://github.com/rfhfv/Forecast.git
+cd Forecast
+open Forecast.xcodeproj
+```
